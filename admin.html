@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin – Mazda Airlines</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+    .card { border: 1px solid #ccc; margin: 10px auto; padding: 10px; width: 300px; border-radius: 8px; }
+    input { margin-top: 10px; padding: 5px; width: 60%; }
+    button { margin: 5px; padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <h1>Captain Simon's Control Panel</h1>
+  <div id="requestList"></div>
+
+  <script>
+    async function fetchRequests() {
+      const res = await fetch('/requests');
+      const data = await res.json();
+      const container = document.getElementById('requestList');
+      container.innerHTML = '';
+
+      data.forEach(person => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `<strong>${person.name}</strong> from ${person.city}<br>Status: ${person.status}`;
+
+        if (person.status === 'pending') {
+          const input = document.createElement('input');
+          input.placeholder = 'Enter ETA';
+          input.id = 'eta-' + person.name;
+
+          const approveBtn = document.createElement('button');
+          approveBtn.textContent = 'Approve';
+          approveBtn.onclick = () => updateStatus(person.name, 'approved', input.value);
+
+          const rejectBtn = document.createElement('button');
+          rejectBtn.textContent = 'Reject';
+          rejectBtn.onclick = () => updateStatus(person.name, 'rejected', null);
+
+          div.appendChild(document.createElement('br'));
+          div.appendChild(input);
+          div.appendChild(approveBtn);
+          div.appendChild(rejectBtn);
+        } else if (person.status === 'approved') {
+          div.innerHTML += `<br>ETA: ${person.eta}`;
+        }
+
+        container.appendChild(div);
+      });
+    }
+
+    async function updateStatus(name, status, eta) {
+      await fetch(`/requests/${encodeURIComponent(name)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, eta })
+      });
+      fetchRequests();
+    }
+
+    fetchRequests();
+  </script>
+</body>
+</html>

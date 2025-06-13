@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mazda Airlines – Request a Ride</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    form { margin-top: 30px; }
+    input { padding: 10px; margin: 10px; width: 200px; }
+    button { padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🚗 Mazda Airlines – Ride Request</h1>
+  <p>Enter your name and city to request a ride from Captain Simon!</p>
+  <form id="requestForm">
+    <input type="text" id="name" placeholder="Your Name" required><br>
+    <input type="text" id="city" placeholder="Your City" required><br>
+    <button type="submit">Submit Request</button>
+  </form>
+  <p id="statusMessage"></p>
+
+  <script>
+    document.getElementById('requestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const res = await fetch('/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, city })
+      });
+      if (res.ok) {
+        document.getElementById('statusMessage').textContent = "Request sent! Wait for the captain's approval.";
+      } else {
+        document.getElementById('statusMessage').textContent = "Error. Try again.";
+      }
+    });
+  </script>
+</body>
+</html>
