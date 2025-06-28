@@ -131,6 +131,8 @@
     <p>Book your flight with vibes & horsepower 🏎️</p>
 
     <form id="requestForm">
+      <input type="text" id="passenger" placeholder="Your Full Name" required />
+
       <select id="from" required>
         <option value="">From</option>
         <option value="Beirut">Beirut</option>
@@ -160,7 +162,7 @@
 
       <select id="to" required>
         <option value="">To</option>
-        <!-- Same cities as above, or customize -->
+        <!-- Same list again -->
         <option value="Beirut">Beirut</option>
         <option value="Jounieh">Jounieh</option>
         <option value="Byblos">Byblos</option>
@@ -186,7 +188,20 @@
         <option value="Hazmieh">Hazmieh</option>
       </select>
 
-      <input type="date" id="date" required />
+      <input
+        type="date"
+        id="date"
+        required
+        style="
+          appearance: none;
+          -webkit-appearance: none;
+          padding-left: 14px;
+          background-image: url('https://img.icons8.com/ios-glyphs/30/calendar--v1.png');
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          background-size: 20px;
+        "
+      />
 
       <button type="submit"><i class="fas fa-ticket"></i> Book Now</button>
       <div class="status" id="statusMessage"></div>
@@ -232,13 +247,16 @@
         .getElementById("requestForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          const passenger = document.getElementById("passenger").value;
           const from = document.getElementById("from").value;
           const to = document.getElementById("to").value;
           const date = document.getElementById("date").value;
-          const name = `${from} to ${to}`;
+
+          const name = `${passenger} – ${from} to ${to}`;
           const city = to;
 
           localStorage.setItem("mazdaUserName", name);
+
           const res = await fetch("/requests", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -247,10 +265,12 @@
 
           const statusDiv = document.getElementById("statusMessage");
           if (res.ok) {
-            statusDiv.textContent = "✅ Booking request sent!";
+            statusDiv.innerHTML = `<span style="color: lightgreen;"><i class="fas fa-check-square"></i> Booking request sent!</span>`;
           } else {
             const data = await res.json();
-            statusDiv.textContent = `⚠️ ${data.message || "Error. Try again."}`;
+            statusDiv.innerHTML = `<span style="color: orange;"><i class="fas fa-exclamation-triangle"></i> ${
+              data.message || "Error. Try again."
+            }</span>`;
           }
         });
 
