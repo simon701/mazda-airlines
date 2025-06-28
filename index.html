@@ -1,121 +1,290 @@
-
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Mazda Airlines – Request a Ride</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    form { margin-top: 30px; }
-    input {
-      padding: 10px;
-      margin: 10px auto;
-      width: 80%;
-      max-width: 300px;
-      display: block;
-    }
-
-    button { padding: 10px 20px; cursor: pointer; }
-    .boarding-card {
-      border: 2px dashed #888;
-      background-color: #f9f9f9;
-      margin: 30px auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 320px;
-}
-
-  </style>
-</head>
-<body>
-  <h1>🚗 Mazda Airlines – Ride Request</h1>
-  <p>Enter your name and city to request a ride from Captain Simon!</p>
-  <form id="requestForm">
-    <input type="text" id="name" placeholder="Your Name" required><br>
-    <input type="text" id="city" placeholder="Your City" required><br>
-    <button type="submit">Submit Request</button>
-  </form>
-  <p id="statusMessage"></p>
-  <div id="boardingPass"></div>
-
-  <script>
-    const flightPrefixes = ["MAZ", "LB", "ZGH", "YALLA", "SIM", "LBN"];
-    const gateJokes = [
-      "Gate A7 – near the shawarma stand",
-      "Gate B3 – past the third pothole",
-      "Gate Z1 – next to the guy selling mana2eesh",
-      "Gate M4 – beside the broken roundabout",
-      "Gate C2 – near the loud dabke wedding",
-      "Gate D9 – under the hanging wires",
-      "Gate E5 – past the shortcut with 4 speed bumps"
-    ];
-    const jokes = [
-      "Brian – Always late. Needs a round of applause if he's ever early.",
-      "Vic – Always in the gym. Might board with protein powder in his carry-on.",
-      "Kerkor – Always trying to kill someone in football. Slide tackles at takeoff.",
-      "Ric – Can’t board without snacks. Last time he brought chips, they lived in the Mazda longer than some of our friendships.",
-      "GAF – Thinks he's a doctor, but almost killed me last time. Board at your own risk.",
-      "Ray – Always puts music in the car… I just wish they were all good.",
-      "If this flight had leg day, Vic would’ve already been here.",
-      "Brian probably missed this flight too. Classic.",
-      "GAF’s prescription for turbulence? Panadol and vibes.",
-      "Kerkor’s boarding pass says ‘slide tackle ready’. Proceed with caution.",
-      "Jean – Blasts French music like he’s Paris-born… but studied in English and barely speaks French. Shouts on the road like he owns it and the soundtrack.",
-      "Jean – Plays French music at max volume, shouts like a rally driver, and somehow still asks what 'bonjour' means.",
-      "No seatbelts, no snacks… but I might be at your door in 15 minutes. Buckle up (emotionally).",
-      "Delays? Never heard of her. I operate on vibes and Google Maps.",
-      "Our in-flight service includes music from my busted speakers and sharp turns you didn’t ask for.",
-      "No turbulence. Just Lebanese roads.",
-      "Book now. No refunds. No mercy.",
-      "In case of emergency, pray I don’t miss the exit.",
-      "Now boarding: Anyone who can handle 180 km/h in a 50 zone."
-    ];
-
-    document.getElementById('requestForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const city = document.getElementById('city').value.trim();
-      localStorage.setItem('mazdaUserName', name);
-      const res = await fetch('/requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, city })
-      });
-      if (res.ok) {
-        document.getElementById('statusMessage').textContent = "Request sent! Wait for the captain's approval.";
-      } else {
-        document.getElementById('statusMessage').textContent = "Error. Try again.";
+<html lang="en">
+  <head>
+    <title>Mazda Airlines – Book a Flight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(to bottom right, #005bea, #00c6fb);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        overflow-x: hidden;
       }
-    });
 
-    async function checkApproval() {
-      const name = localStorage.getItem('mazdaUserName');
-      if (!name) return;
+      h1 {
+        margin-bottom: 10px;
+        font-size: 2.2em;
+        animation: fadeInDown 1s ease;
+      }
 
-      const res = await fetch('/requests');
-      const data = await res.json();
-      const user = data.find(p => p.name === name && p.status === 'approved');
-      if (user) {
-        const flight = `${flightPrefixes[Math.floor(Math.random() * flightPrefixes.length)]}-${Math.floor(100 + Math.random() * 900)}`;
-        const gate = gateJokes[Math.floor(Math.random() * gateJokes.length)];
-        const joke = jokes[Math.floor(Math.random() * jokes.length)];
+      form {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 25px;
+        border-radius: 12px;
+        max-width: 400px;
+        margin: 30px auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 1.2s ease;
+        transition: transform 0.3s ease;
+      }
 
-        const passDiv = document.getElementById('boardingPass');
-        passDiv.innerHTML = `
+      form:hover {
+        transform: scale(1.02);
+      }
+
+      select,
+      input[type="date"],
+      button {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: 0.3s;
+      }
+
+      select,
+      input[type="date"] {
+        background-color: white;
+        color: black;
+      }
+
+      button {
+        background-color: #ffcc00;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #e6b800;
+      }
+
+      .status {
+        margin-top: 15px;
+        font-weight: bold;
+      }
+
+      .boarding-card {
+        margin: 30px auto;
+        padding: 20px;
+        background: white;
+        color: black;
+        max-width: 360px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-family: monospace;
+        animation: slideIn 1.2s ease;
+      }
+
+      .boarding-card em {
+        color: #005bea;
+        display: block;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInDown {
+        from {
+          transform: translateY(-30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1><i class="fas fa-plane-departure"></i> Mazda Airlines</h1>
+    <p>Book your flight with vibes & horsepower 🏎️</p>
+
+    <form id="requestForm">
+      <select id="from" required>
+        <option value="">From</option>
+        <option value="Beirut">Beirut</option>
+        <option value="Jounieh">Jounieh</option>
+        <option value="Byblos">Byblos</option>
+        <option value="Batroun">Batroun</option>
+        <option value="Tripoli">Tripoli</option>
+        <option value="Zahle">Zahle</option>
+        <option value="Aley">Aley</option>
+        <option value="Baalbek">Baalbek</option>
+        <option value="Jezzine">Jezzine</option>
+        <option value="Sidon">Sidon</option>
+        <option value="Tyre">Tyre</option>
+        <option value="Beit Mery">Beit Mery</option>
+        <option value="Antelias">Antelias</option>
+        <option value="Zouk">Zouk</option>
+        <option value="Jeita">Jeita</option>
+        <option value="Bikfaya">Bikfaya</option>
+        <option value="Broummana">Broummana</option>
+        <option value="Dbayeh">Dbayeh</option>
+        <option value="Ain Saadeh">Ain Saadeh</option>
+        <option value="Chouf">Chouf</option>
+        <option value="Jbeil">Jbeil</option>
+        <option value="Fanar">Fanar</option>
+        <option value="Hazmieh">Hazmieh</option>
+      </select>
+
+      <select id="to" required>
+        <option value="">To</option>
+        <!-- Same cities as above, or customize -->
+        <option value="Beirut">Beirut</option>
+        <option value="Jounieh">Jounieh</option>
+        <option value="Byblos">Byblos</option>
+        <option value="Batroun">Batroun</option>
+        <option value="Tripoli">Tripoli</option>
+        <option value="Zahle">Zahle</option>
+        <option value="Aley">Aley</option>
+        <option value="Baalbek">Baalbek</option>
+        <option value="Jezzine">Jezzine</option>
+        <option value="Sidon">Sidon</option>
+        <option value="Tyre">Tyre</option>
+        <option value="Beit Mery">Beit Mery</option>
+        <option value="Antelias">Antelias</option>
+        <option value="Zouk">Zouk</option>
+        <option value="Jeita">Jeita</option>
+        <option value="Bikfaya">Bikfaya</option>
+        <option value="Broummana">Broummana</option>
+        <option value="Dbayeh">Dbayeh</option>
+        <option value="Ain Saadeh">Ain Saadeh</option>
+        <option value="Chouf">Chouf</option>
+        <option value="Jbeil">Jbeil</option>
+        <option value="Fanar">Fanar</option>
+        <option value="Hazmieh">Hazmieh</option>
+      </select>
+
+      <input type="date" id="date" required />
+
+      <button type="submit"><i class="fas fa-ticket"></i> Book Now</button>
+      <div class="status" id="statusMessage"></div>
+    </form>
+
+    <div id="boardingPass"></div>
+
+    <script>
+      const flightPrefixes = ["MAZ", "LB", "ZGH", "YALLA", "SIM", "LBN"];
+      const gateJokes = [
+        "Gate A7 – near the shawarma stand",
+        "Gate B3 – past the third pothole",
+        "Gate Z1 – next to the guy selling mana2eesh",
+        "Gate M4 – beside the broken roundabout",
+        "Gate C2 – near the loud dabke wedding",
+        "Gate D9 – under the hanging wires",
+        "Gate E5 – past the shortcut with 4 speed bumps",
+      ];
+      const jokes = [
+        "Brian – Always late. Needs a round of applause if he's ever early.",
+        "Vic – Always in the gym. Might board with protein powder in his carry-on.",
+        "Kerkor – Always trying to kill someone in football. Slide tackles at takeoff.",
+        "Ric – Can’t board without snacks. Last time he brought chips, they lived in the Mazda longer than some of our friendships.",
+        "GAF – Thinks he's a doctor, but almost killed me last time. Board at your own risk.",
+        "Ray – Always puts music in the car… I just wish they were all good.",
+        "If this flight had leg day, Vic would’ve already been here.",
+        "Brian probably missed this flight too. Classic.",
+        "GAF’s prescription for turbulence? Panadol and vibes.",
+        "Kerkor’s boarding pass says ‘slide tackle ready’. Proceed with caution.",
+        "Jean – Blasts French music like he’s Paris-born… but studied in English and barely speaks French. Shouts on the road like he owns it and the soundtrack.",
+        "Jean – Plays French music at max volume, shouts like a rally driver, and somehow still asks what 'bonjour' means.",
+        "No seatbelts, no snacks… but I might be at your door in 15 minutes. Buckle up (emotionally).",
+        "Delays? Never heard of her. I operate on vibes and Google Maps.",
+        "Our in-flight service includes music from my busted speakers and sharp turns you didn’t ask for.",
+        "No turbulence. Just Lebanese roads.",
+        "Book now. No refunds. No mercy.",
+        "In case of emergency, pray I don’t miss the exit.",
+        "Now boarding: Anyone who can handle 180 km/h in a 50 zone.",
+        "Ric – Says he's not hungry. Then eats half your order and says, 'just tasting bro.'",
+      ];
+
+      document
+        .getElementById("requestForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const from = document.getElementById("from").value;
+          const to = document.getElementById("to").value;
+          const date = document.getElementById("date").value;
+          const name = `${from} to ${to}`;
+          const city = to;
+
+          localStorage.setItem("mazdaUserName", name);
+          const res = await fetch("/requests", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, city }),
+          });
+
+          const statusDiv = document.getElementById("statusMessage");
+          if (res.ok) {
+            statusDiv.textContent = "✅ Booking request sent!";
+          } else {
+            const data = await res.json();
+            statusDiv.textContent = `⚠️ ${data.message || "Error. Try again."}`;
+          }
+        });
+
+      async function checkApproval() {
+        const name = localStorage.getItem("mazdaUserName");
+        if (!name) return;
+
+        const res = await fetch("/requests");
+        const data = await res.json();
+        const user = data.find(
+          (p) => p.name === name && p.status === "approved"
+        );
+        if (user) {
+          const flight = `${
+            flightPrefixes[Math.floor(Math.random() * flightPrefixes.length)]
+          }-${Math.floor(100 + Math.random() * 900)}`;
+          const gate = gateJokes[Math.floor(Math.random() * gateJokes.length)];
+          const joke = jokes[Math.floor(Math.random() * jokes.length)];
+
+          const passDiv = document.getElementById("boardingPass");
+          passDiv.innerHTML = `
           <div class="boarding-card">
             <strong>${user.name}</strong><br>
-            City: ${user.city}<br>
+            Destination: ${user.city}<br>
             Flight: ${flight}<br>
             Gate: ${gate}<br>
-            ETA: ${user.eta}<br><br>
+            ETA: ${user.eta}<br>
             <em>"${joke}"</em>
           </div>
         `;
+        }
       }
-    }
 
-    checkApproval();
-  </script>
-</body>
+      checkApproval();
+    </script>
+  </body>
 </html>

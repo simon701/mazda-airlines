@@ -1,73 +1,79 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Mazda Airlines – Boarding List</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
-    .passenger-card {
-      border: 2px dashed #888;
-      background-color: white;
-      margin: 15px auto;
-      padding: 15px;
-      border-radius: 10px;
-      width: 320px;
-    }
-  </style>
-</head>
-<body>
-  <h1>🛫 Mazda Airlines – Boarding Now</h1>
-  <div id="approvedList"></div>
+  <head>
+    <title>Mazda Airlines – Boarding List</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .passenger-card {
+        border: 2px dashed #888;
+        background-color: white;
+        margin: 15px auto;
+        padding: 15px;
+        border-radius: 10px;
+        width: 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🛫 Mazda Airlines – Boarding Now</h1>
+    <div id="approvedList"></div>
+    <div id="clock" style="font-size: 1.2em; margin-top: 20px"></div>
+    <script>
+      const flightPrefixes = ["MAZ", "LB", "ZGH", "YALLA", "SIM", "LBN"];
+      const gateJokes = [
+        "Gate A7 – near the shawarma stand",
+        "Gate B3 – past the third pothole",
+        "Gate Z1 – next to the guy selling mana2eesh",
+        "Gate M4 – beside the broken roundabout",
+        "Gate C2 – near the loud dabke wedding",
+        "Gate D9 – under the hanging wires",
+        "Gate E5 – past the shortcut with 4 speed bumps",
+      ];
+      const jokes = [
+        "Brian – Always late. Needs a round of applause if he's ever early.",
+        "Vic – Always in the gym. Might board with protein powder in his carry-on.",
+        "Kerkor – Always trying to kill someone in football. Slide tackles at takeoff.",
+        "Ric – Can’t board without snacks. Last time he brought chips, they lived in the Mazda longer than some of our friendships.",
+        "GAF – Thinks he's a doctor, but almost killed me last time. Board at your own risk.",
+        "Ray – Always puts music in the car… I just wish they were all good.",
+        "If this flight had leg day, Vic would’ve already been here.",
+        "Brian probably missed this flight too. Classic.",
+        "GAF’s prescription for turbulence? Panadol and vibes.",
+        "Kerkor’s boarding pass says ‘slide tackle ready’. Proceed with caution.",
+        "Jean – Blasts French music like he’s Paris-born… but studied in English and barely speaks French. Shouts on the road like he owns it and the soundtrack.",
+        "Jean – Plays French music at max volume, shouts like a rally driver, and somehow still asks what 'bonjour' means.",
+        "No seatbelts, no snacks… but I might be at your door in 15 minutes. Buckle up (emotionally).",
+        "Delays? Never heard of her. I operate on vibes and Google Maps.",
+        "Our in-flight service includes music from my busted speakers and sharp turns you didn’t ask for.",
+        "No turbulence. Just Lebanese roads.",
+        "Book now. No refunds. No mercy.",
+        "In case of emergency, pray I don’t miss the exit.",
+        "Now boarding: Anyone who can handle 180 km/h in a 50 zone.",
+        "Ric – Says he's not hungry. Then eats half your order and says, 'just tasting bro.'",
+      ];
 
-  <script>
-    const flightPrefixes = ["MAZ", "LB", "ZGH", "YALLA", "SIM", "LBN"];
-    const gateJokes = [
-      "Gate A7 – near the shawarma stand",
-      "Gate B3 – past the third pothole",
-      "Gate Z1 – next to the guy selling mana2eesh",
-      "Gate M4 – beside the broken roundabout",
-      "Gate C2 – near the loud dabke wedding",
-      "Gate D9 – under the hanging wires",
-      "Gate E5 – past the shortcut with 4 speed bumps"
-    ];
-    const jokes = [
-      "Brian – Always late. Needs a round of applause if he's ever early.",
-      "Vic – Always in the gym. Might board with protein powder in his carry-on.",
-      "Kerkor – Always trying to kill someone in football. Slide tackles at takeoff.",
-      "Ric – Can’t board without snacks. Last time he brought chips, they lived in the Mazda longer than some of our friendships.",
-      "GAF – Thinks he's a doctor, but almost killed me last time. Board at your own risk.",
-      "Ray – Always puts music in the car… I just wish they were all good.",
-      "If this flight had leg day, Vic would’ve already been here.",
-      "Brian probably missed this flight too. Classic.",
-      "GAF’s prescription for turbulence? Panadol and vibes.",
-      "Kerkor’s boarding pass says ‘slide tackle ready’. Proceed with caution.",
-      "Jean – Blasts French music like he’s Paris-born… but studied in English and barely speaks French. Shouts on the road like he owns it and the soundtrack.",
-      "Jean – Plays French music at max volume, shouts like a rally driver, and somehow still asks what 'bonjour' means.",
-      "No seatbelts, no snacks… but I might be at your door in 15 minutes. Buckle up (emotionally).",
-      "Delays? Never heard of her. I operate on vibes and Google Maps.",
-      "Our in-flight service includes music from my busted speakers and sharp turns you didn’t ask for.",
-      "No turbulence. Just Lebanese roads.",
-      "Book now. No refunds. No mercy.",
-      "In case of emergency, pray I don’t miss the exit.",
-      "Now boarding: Anyone who can handle 180 km/h in a 50 zone.",
-      "Ric – Says he's not hungry. Then eats half your order and says, 'just tasting bro.'"
-    ];
+      async function fetchApproved() {
+        const res = await fetch("/requests");
+        const data = await res.json();
+        const container = document.getElementById("approvedList");
+        container.innerHTML = "";
 
-    async function fetchApproved() {
-      const res = await fetch('/requests');
-      const data = await res.json();
-      const container = document.getElementById('approvedList');
-      container.innerHTML = '';
+        const approved = data.filter((p) => p.status === "approved");
+        approved.forEach((p) => {
+          const flight = `${
+            flightPrefixes[Math.floor(Math.random() * flightPrefixes.length)]
+          }-${Math.floor(100 + Math.random() * 900)}`;
+          const gate = gateJokes[Math.floor(Math.random() * gateJokes.length)];
+          const joke = jokes[Math.floor(Math.random() * jokes.length)];
 
-      const approved = data.filter(p => p.status === 'approved');
-      approved.forEach(p => {
-        const flight = `${flightPrefixes[Math.floor(Math.random() * flightPrefixes.length)]}-${Math.floor(100 + Math.random() * 900)}`;
-        const gate = gateJokes[Math.floor(Math.random() * gateJokes.length)];
-        const joke = jokes[Math.floor(Math.random() * jokes.length)];
-
-        const card = document.createElement('div');
-        card.className = 'passenger-card';
-        card.innerHTML = `
+          const card = document.createElement("div");
+          card.className = "passenger-card";
+          card.innerHTML = `
           <strong>${p.name}</strong><br>
           City: ${p.city}<br>
           Flight: ${flight}<br>
@@ -75,11 +81,17 @@
           ETA: ${p.eta}<br><br>
           <em>"${joke}"</em>
         `;
-        container.appendChild(card);
-      });
-    }
+          container.appendChild(card);
+        });
+      }
 
-    fetchApproved();
-  </script>
-</body>
+      fetchApproved();
+      function updateTime() {
+        const now = new Date();
+        document.getElementById("clock").textContent = now.toLocaleTimeString();
+      }
+      setInterval(updateTime, 1000);
+      updateTime();
+    </script>
+  </body>
 </html>
