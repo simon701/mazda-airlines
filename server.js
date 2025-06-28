@@ -1,5 +1,3 @@
-// --- File: server.js ---
-
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -9,14 +7,10 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 app.use(express.static(__dirname));
-
-
 app.use(cors());
 app.use(bodyParser.json());
 
 const DATA_FILE = path.join(__dirname, 'requests.json');
-
-// Ensure file exists
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]');
 
 // Get all requests
@@ -25,11 +19,14 @@ app.get('/requests', (req, res) => {
   res.json(data);
 });
 
-// Add new request
+// Add new request (with duplicate prevention)
 app.post('/requests', (req, res) => {
   const { name, city } = req.body;
-  const newEntry = { name, city, status: 'pending', eta: null };
   const data = JSON.parse(fs.readFileSync(DATA_FILE));
+  const exists = data.some(entry => entry.name === name && entry.status !== 'rejected');
+  if (exists) return res.status(400).json({ success: false, message: 'Duplicate entry' });
+
+  const newEntry = { name, city, status: 'pending', eta: null };
   data.push(newEntry);
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
   res.status(201).json({ success: true });
@@ -49,6 +46,15 @@ app.put('/requests/:name', (req, res) => {
   } else {
     res.status(404).json({ success: false, message: 'User not found' });
   }
+});
+
+// Delete request
+app.delete('/requests/:name', (req, res) => {
+  const name = req.params.name;
+  let data = JSON.parse(fs.readFileSync(DATA_FILE));
+  data = data.filter(p => p.name !== name);
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
